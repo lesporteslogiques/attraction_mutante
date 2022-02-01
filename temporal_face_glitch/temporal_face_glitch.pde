@@ -11,7 +11,7 @@ import processing.video.*;
 
 OpenCV opencv;
 Rectangle[] faces;
-Capture video;
+Capture cam;
 
 final int NUM_RECORDS = 16;
 final int SEGMENT_MAX_FRAMES = 30;
@@ -26,22 +26,23 @@ int delay = NFRAMES_BEFORE_REC;
 
 
 void setup() {
-  size(640, 480);
+  //size(640, 480);
+  fullScreen();
 
-  opencv = new OpenCV(this, width, height);
+  cam = new Capture(this, 640, 480);
+  cam.start();
+  
+  opencv = new OpenCV(this, cam.width, cam.height);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
-
-  video = new Capture(this, width, height);
-  video.start();
 
   println(opencv.version());
   System.out.println("Maximum memory (Mo) " + Runtime.getRuntime().maxMemory()/1000000);
 }
 
 void draw() {  
-  if (video.available() == true) {
-    video.read();
-    opencv.loadImage(video);
+  if (cam.available() == true) {
+    cam.read();
+    opencv.loadImage(cam);
     opencv.blur(1);
     faces = opencv.detect();
   }  
@@ -53,11 +54,11 @@ void draw() {
       if (playing_segment != null && num_frame < playing_segment.length) {
         set(0, 0, playing_segment[num_frame]);
       } else {
-        set(0, 0, video);
+        set(0, 0, cam);
       }
       
       if (num_frame < SEGMENT_MAX_FRAMES) {
-        record[num_frame] = video.copy();
+        record[num_frame] = cam.copy();
         num_frame += 1;
         //fill(255, 0, 0);
         //noStroke();
@@ -73,7 +74,7 @@ void draw() {
         }
       }
     } else {
-      set(0, 0, video);
+      set(0, 0, cam);
       delay -= 1;
     }
   }
@@ -99,7 +100,7 @@ void draw() {
       println(recorded_segments.size());
     }
     
-    set(0, 0, video);
+    set(0, 0, cam);
   }
 }
 

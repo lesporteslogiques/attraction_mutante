@@ -52,7 +52,7 @@ import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.net.URL;
 import java.util.Base64;
-String imgbb_api_key = "7eb8c57ff080711867ed0dfb504b72e7";
+String imgbb_api_key = "";
 String imgbb_url = "https://api.imgbb.com/1/upload";
 boolean upload_pending = false;
 PImage upload_en_cours;

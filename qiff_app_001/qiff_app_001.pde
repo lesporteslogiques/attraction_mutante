@@ -197,7 +197,8 @@ void uploadImage() throws IOException {
   Date now = new Date();
   SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd_HHmmss");
   System.out.println(formater.format(now));
-  String imagefilename = SKETCH_NAME + "_" + formater.format(now) + ".png";
+  String imageBasename = SKETCH_NAME + "_" + formater.format(now);
+  String imagefilename = imageBasename + ".png";
   save(imagefilename);  // Save image to disk first
 
   URL url = new URL(imgbb_url);
@@ -215,8 +216,8 @@ void uploadImage() throws IOException {
   reader.close();
 
   String paramString = "key=" + imgbb_api_key + "&";
-  paramString += "image=";
-  paramString += URLEncoder.encode(Base64.getEncoder().encodeToString(allBytes), "UTF-8");
+  paramString += "name=" + URLEncoder.encode(imageBasename, "UTF-8") + "&";
+  paramString += "image=" + URLEncoder.encode(Base64.getEncoder().encodeToString(allBytes), "UTF-8");
 
   DataOutputStream out = new DataOutputStream(con.getOutputStream());
   out.writeBytes(paramString);
