@@ -1,14 +1,14 @@
 # Attraction Mutante
 ## Sketchs Processing
 ### Temporal Face Glitch
-Fait apparaître des visages du passé lorsqu'on regarde la camera en face.
+Fait apparaître des visages du passé lorsqu'on regarde la camera en face.\
 A adapter
 ### Sisters with Transistors
-Effet inspiré du documentaire "Sisters with Transistors".
+Effet inspiré du documentaire "Sisters with Transistors".\
 A adapter
 ### Datamoshing5
-Effet datamoshing
+Effet datamoshing\
 A adapter
 ### Datamoshing6
-Effet datamoshing
+Effet datamoshing\
 A adapter
