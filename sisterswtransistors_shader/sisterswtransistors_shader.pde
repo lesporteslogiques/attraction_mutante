@@ -1,22 +1,78 @@
-// Gweltaz Duval-Guennoc 30-07-2021
+/*
+ Effet inspiré du documentaire "Sisters with Transistors"
+ Gweltaz Duval-Guennoc (gwel@ik.me)
+ 
+ La Baleine, Quimper, Dour Ru, 20220201
+ Processing 4.0b2 @ kirin / Debian Stretch 9.5
+ Son "Camera Shutter" par Roachpowder : https://freesound.org/people/roachpowder/sounds/170229/
+ Icone "cloud upload" par Github : https://github.com/github/octicons
+ 
+ Entrées : webcam, micro, bouton (connexion USB-Série avec un arduino)
+ 
+ Affichage/masquage de 5 paramètres normalisés en appuyant sur espace
+ 
+ L'image est inversée dans un buffer graphique (cam_inverse)
+ C'est ce buffer qu'il faut travailler!
+ 
+ /!\ indiquer la clé d'API imgbb (ligne ~52) String imgbb_api_key = "************************";
+ 
+ */
+
+// Config *************************************
+boolean UPLOAD_ON = true; // false pour annuler l'envoi des images sur le web
+
+// Paramètres *********************************
+import controlP5.*;
+ControlP5 cp5;
+float param1, param2, param3, param4, param5;
+boolean display_param = true;
+
+// Pour l'entrée micro ************************
+import processing.sound.*;
+AudioIn micro;
+Amplitude volume;
+float niveau_sonore;
+// Et jouer un son
+SoundFile son_camera;
+
+// Pour la connexion série avec arduino *******
+import processing.serial.*;
+Serial arduino;
+boolean bascule_bouton = true;
+
+// Pour la webcam *****************************
+import processing.video.*;
+Capture cam;
+//PImage cam_inverse;
+PGraphics cam_inverse;
+
+// Pour l'upload ******************************
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.net.URL;
+import java.util.Base64;
+String imgbb_api_key = "7eb8c57ff080711867ed0dfb504b72e7";
+String imgbb_url = "https://api.imgbb.com/1/upload";
+boolean upload_pending = false;
+PImage upload_en_cours;
+float upload_started;
+
+// Pour la sauvegarde des fichiers *************
+import java.util.Date;
+import java.text.SimpleDateFormat;
+String SKETCH_NAME = getClass().getSimpleName();
+
 
 import java.util.Map;
 import java.util.function.Function;
 
-import processing.video.*;
-//import processing.serial.*;
 
-import controlP5.*;
-
-ControlP5 cp5;
 Group g;
-
-Capture video;
 
 PShader shader;
 PShader postproc;
 PGraphics pg;
-PImage maskImage;
 
 HashMap<String, Function<Float, Float>> step_functions = new HashMap<>();
 Function<Float, Float> gradient_step_function;
@@ -28,11 +84,31 @@ float icol = 0f;
 
 void setup() {
   //size(800, 600, P3D);
-  fullScreen(P3D, 1);
-  surface.setResizable(true);
+  size(1280, 600, P3D);
+  //fullScreen(P3D);
+  
+  Sound.list();                  // Liste du hardware audio
 
-  video = new Capture(this, width, height);
-  video.start();
+  micro = new AudioIn(this, 0);  // Créer une entrée micro
+  micro.start();                 // Démarrer l'écoute du micro
+  volume = new Amplitude(this);  // Démarrer l'analyseur de volume
+  volume.input(micro);           // Brancher l'entrée micro sur l'analyseur de volume
+
+  son_camera = new SoundFile(this, "freesound-roachpowder-camera-shutter.wav");
+  son_camera.play();             // Jouer un coup au démarrage pour test
+
+  printArray(Serial.list());     // Afficher sur la console la liste des ports série utilisés
+  String nom_port = Serial.list()[1];  // Attention à choisir le bon port série!
+  //arduino = new Serial(this, nom_port, 9600);
+  //arduino.bufferUntil('\n');
+
+  String[] cameras = Capture.list();
+  printArray(cameras);
+  cam = new Capture(this, 640, 480);
+  cam.start();
+  cam_inverse = createGraphics(cam.width, cam.height);
+
+  upload_en_cours = loadImage("cloud_upload.png");
 
   pg = createGraphics(width, height, P3D);
   pg.beginDraw();
@@ -119,7 +195,7 @@ void setup() {
     .setPosition(0, h)
     .setSize(sliderWidth, itemHeight)
     .setRange(0.01f, 5f)
-    .setValue(1f)
+    .setValue(5f)
     .setGroup(g)
     ;
   h += itemHeight + 2;
@@ -128,7 +204,7 @@ void setup() {
     .setPosition(0, h)
     .setSize(sliderWidth, itemHeight)
     .setRange(0.0f, 10f)
-    .setValue(0.1f)
+    .setValue(8f)
     .setGroup(g)
     ;
   h += itemHeight + 2;
@@ -137,7 +213,7 @@ void setup() {
     .setPosition(0, h)
     .setSize(sliderWidth, itemHeight)
     .setRange(1f, 100f)
-    .setValue(5.0f)
+    .setValue(40.0f)
     .setGroup(g)
     ;
   h += itemHeight + 2;
@@ -156,34 +232,36 @@ void updateShader() {
 
 
 void draw() {
+  // Captation de l'entrée micro *****************************************
+  niveau_sonore = min(1.0, max(volume.analyze(), 0.1f*volume.analyze()+niveau_sonore-0.01f)); // volume.analyze() renvoie une valeur entre 0 et 1
+  
+  if (random(1f) < 0.001f)
+    gradient(int(random(gradients.size())));
+  
   int numcol = gradient.length;
   float frac = icol - floor(icol);
   color col = lerpColor(gradient[floor(icol)],
         gradient[floor(icol+1) % numcol],
         gradient_step_function.apply(frac));
   
-  if (mousePressed && !insideGroup(g)) {
-    float x = map(mouseX, 0, width, 0, cp5.getController("fieldres").getValue());
-    float y = map(mouseY, 0, height, cp5.getController("fieldres").getValue(), 0);
-    shader.set("mouse", x, y);
-    shader.set("click", true);
-  } else {
-    shader.set("click", false);
-  }
 
-  if (video.available()) {
-    video.read();
-    shader.set("video", video);
+  if (cam.available()) {
+    cam.read();
+    shader.set("video", cam);
   }
 
   shader.set("threshold", cp5.getController("threshold").getValue());
   shader.set("maskColor", red(col)/255f, green(col)/255f, blue(col)/255f);
   shader.set("diffuse", cp5.getController("diffuse").getValue());
-  shader.set("vely", cp5.getController("vely").getValue());
-  shader.set("field", cp5.getController("field").getValue());
-  shader.set("fieldres", cp5.getController("fieldres").getValue());
+  float vely = cp5.getController("vely").getValue() * niveau_sonore;
+  vely = max(vely, 0.5);
+  shader.set("vely", vely);
+  float field = cp5.getController("field").getValue() * niveau_sonore;
+  shader.set("field", field);
+  float fieldres = cp5.getController("fieldres").getValue() * niveau_sonore;
+  shader.set("fieldres", fieldres);
   postproc.set("threshold", cp5.getController("threshold").getValue());
-  postproc.set("video", video);
+  postproc.set("video", cam);
 
   updateShader();
   image(pg, 0, 0);
@@ -193,6 +271,12 @@ void draw() {
   rect(0, 0, width, height);
 
   resetShader();
+  
+  // Un délai est nécessaire pour éviter d'avoir l'icone d'upload dans l'image envoyé   
+  if (upload_pending && (millis() - upload_started > 100) ) {
+    if ((frameCount / 16) % 2 == 0)
+      image(upload_en_cours, (width - upload_en_cours.width) / 2, (height - upload_en_cours.height) / 2);
+  }
 
   icol += cp5.getController("color_freq").getValue();
   if (icol >= numcol)
@@ -201,30 +285,10 @@ void draw() {
 
 
 void keyPressed() {
-  if (key == 'c') {
-    pg.beginDraw();
-    pg.clear();
-    pg.endDraw();
-  } else if (key == 's') {
-    String filename = "frames/gwt###.png";
-    saveFrame(filename);
-    println(filename + " saved");
-  }
-}
-
-
-boolean insideGroup(Group group) {
-  float x = group.getPosition()[0];
-  float y = group.getPosition()[1];
-  boolean isInside = false;
-  if (group.isOpen()) {
-    if (mouseX >= x
-      && mouseX <= x + group.getWidth()
-      && mouseY >= y
-      && mouseY <= y + group.getBackgroundHeight())
-      isInside = true;
-  }
-  isInside |= group.isMouseOver();
-
-  return isInside;
+  if (key == ' ') display_param = !display_param;
+  if (!display_param) cp5.hide();
+  if (display_param) cp5.show();
+  
+  if (key == 'b')
+    actionBouton();
 }

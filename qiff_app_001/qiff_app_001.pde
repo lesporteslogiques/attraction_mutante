@@ -148,7 +148,8 @@ public void draw() {
   
   // Un délai est nécessaire pour éviter d'avoir l'icone d'upload dans l'image envoyé   
   if (upload_pending && (millis() - upload_started > 100) ) {
-    image(upload_en_cours, (width - upload_en_cours.width) / 2, (height - upload_en_cours.height) / 2);
+    if ((frameCount / 16) % 2 == 0)
+      image(upload_en_cours, (width - upload_en_cours.width) / 2, (height - upload_en_cours.height) / 2);
   }
 }
 
