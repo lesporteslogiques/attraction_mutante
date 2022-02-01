@@ -2,6 +2,7 @@
 ## Sketchs Processing
 ### Temporal Face Glitch
 Fait apparaître des visages du passé lorsqu'on regarde la camera en face.\
+L'idée me paraissait marrante mais peu d'intérêt pour l'utilisateur d'uploader les photos...\
 Nécessite la librairie OpenCV.\
 A adapter
 ### Sisters with Transistors
