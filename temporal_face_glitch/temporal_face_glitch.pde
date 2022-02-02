@@ -76,11 +76,14 @@ int delay = NFRAMES_BEFORE_REC;
 float rect_w;
 float margin;
 
+boolean DEBUG = true;
+color led_color;
+
 
 void setup() {
   fullScreen(P3D);
   //size(640, 480, P3D);
-  
+
   cam = new Capture(this, 640, 480);
   cam.start();
 
@@ -90,10 +93,13 @@ void setup() {
   float vr = float(height) / cam.height;
   rect_w = vr * cam.width;
   margin = (width-rect_w) * 0.5;
-  
+
   shader = loadShader("shaders/camera_mirror.glsl");
   shader.set("u_resolution", rect_w, float(height));
   shader.set("u_wmargin", margin);
+
+  textSize(24);
+  noStroke();
 
   println(opencv.version());
   System.out.println("Maximum memory (Mo) " + Runtime.getRuntime().maxMemory()/1000000);
@@ -108,6 +114,7 @@ void draw() {
   }
 
   if (faces != null && faces.length > 0) {
+    led_color = color(0, 255, 0, 255);
     // Face detected on camera !
     if (delay <= 0) {
 
@@ -122,9 +129,7 @@ void draw() {
       if (num_frame < SEGMENT_MAX_FRAMES) {
         record[num_frame] = cam.copy();
         num_frame += 1;
-        //fill(255, 0, 0);
-        //noStroke();
-        //circle(width-40, 40, 16);
+        led_color = color(255, 0, 0, 255);
       } else {
         // Glitch randomly
         if (!recorded_segments.isEmpty() && random(1) < 0.05) {
@@ -142,6 +147,7 @@ void draw() {
       delay -= 1;
     }
   } else {
+    led_color = color(0, 0, 0, 0);
     // Reset pre-rec delay
     delay = NFRAMES_BEFORE_REC;
 
@@ -160,19 +166,23 @@ void draw() {
       playing_segment = recorded_segments.get(n);
 
       num_frame = 0;
-      println(recorded_segments.size());
     }
-
     //set(0, 0, cam);
     shader.set("scene", cam);
   }
-  
-  shader(shader);
-  noStroke();
- 
+
   background(0);
+  shader(shader);
   rect(margin, 0, rect_w, height);
-  //resetShader();
+  resetShader();
+
+  if (DEBUG) {
+    fill(led_color);
+    //noStroke();
+    circle(width-20, 20, 32);
+    fill(255);
+    text(recorded_segments.size(), width-25, 55);
+  }
 }
 
 void mouseClicked() {
