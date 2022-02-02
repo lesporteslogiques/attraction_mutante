@@ -52,7 +52,7 @@ import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.net.URL;
 import java.util.Base64;
-String imgbb_api_key = "";
+String imgbb_api_key;
 String imgbb_url = "https://api.imgbb.com/1/upload";
 boolean upload_pending = false;
 PImage upload_en_cours;
@@ -86,6 +86,8 @@ void setup() {
   //size(800, 600, P3D);
   size(1280, 600, P3D);
   //fullScreen(P3D);
+  
+  imgbb_api_key = get_api_key();
   
   Sound.list();                  // Liste du hardware audio
 

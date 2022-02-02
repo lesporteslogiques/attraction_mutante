@@ -1,3 +1,9 @@
+String get_api_key() {
+  String[] lines = loadStrings("api.txt");
+  return lines[0];
+}
+
+
 void serialEvent (Serial myPort) {
   try {
     while (myPort.available() > 0) {
@@ -20,6 +26,7 @@ void serialEvent (Serial myPort) {
   }
 }
 
+String imageBasename;
 String imagefilename;
 
 void actionBouton() {
@@ -28,17 +35,19 @@ void actionBouton() {
   if (UPLOAD_ON) {
     if (!upload_pending) {
       println("Envoi de l'image");
+      
       // Enregistrer l'image dans le dossier du sketch
       Date now = new Date();
       SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd_HHmmss");
       System.out.println(formater.format(now));
-      imagefilename = SKETCH_NAME + "_" + formater.format(now) + ".png";
-      save(imagefilename);  // Save image to disk first
+      imageBasename = SKETCH_NAME + "_" + formater.format(now);
+      imagefilename = imageBasename + ".png";
+      save(imagefilename);
+      
       thread("uploadImage");
     }
   }
 }
-
 
 void uploadImage() throws IOException {
   upload_pending = true;
@@ -59,8 +68,8 @@ void uploadImage() throws IOException {
   reader.close();
 
   String paramString = "key=" + imgbb_api_key + "&";
-  paramString += "image=";
-  paramString += URLEncoder.encode(Base64.getEncoder().encodeToString(allBytes), "UTF-8");
+  paramString += "name=" + URLEncoder.encode(imageBasename, "UTF-8") + "&";
+  paramString += "image=" + URLEncoder.encode(Base64.getEncoder().encodeToString(allBytes), "UTF-8");
 
   DataOutputStream out = new DataOutputStream(con.getOutputStream());
   out.writeBytes(paramString);

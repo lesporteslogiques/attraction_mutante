@@ -1,10 +1,12 @@
 
-
 String get_api_key() {
   String[] lines = loadStrings("api.txt");
   return lines[0];
 }
 
+
+String imageBasename;
+String imagefilename;
 
 void actionBouton() {
   bascule_bouton = !bascule_bouton;
@@ -12,31 +14,17 @@ void actionBouton() {
   if (UPLOAD_ON) {
     if (!upload_pending) {
       println("Envoi de l'image");
+      
+      // Enregistrer l'image dans le dossier du sketch
+      Date now = new Date();
+      SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      System.out.println(formater.format(now));
+      imageBasename = SKETCH_NAME + "_" + formater.format(now);
+      imagefilename = imageBasename + ".png";
+      save(imagefilename);
+      
       thread("uploadImage");
     }
-  }
-}
-
-
-void serialEvent (Serial myPort) {
-  try {
-    while (myPort.available() > 0) {
-      String inBuffer = myPort.readStringUntil('\n');
-      if (inBuffer != null) {
-        try {
-          int val = 0;
-          String s = inBuffer.replace("\n", "");
-          val = Integer.parseInt(s.trim());
-          if (val == 1) actionBouton();
-          println("valeur transmise par le port série : " + val);
-        }
-        catch (NumberFormatException npe) {
-          // Not an integer so forget it
-        }
-      }
-    }
-  }
-  catch (Exception e) {
   }
 }
 
@@ -44,14 +32,6 @@ void serialEvent (Serial myPort) {
 void uploadImage() throws IOException {
   upload_pending = true;
   upload_started = millis();
-
-  // Enregistrer l'image dans le dossier du sketch
-  Date now = new Date();
-  SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd_HHmmss");
-  System.out.println(formater.format(now));
-  String imageBasename = SKETCH_NAME + "_" + formater.format(now);
-  String imagefilename = imageBasename + ".png";
-  save(imagefilename);  // Save image to disk first
 
   URL url = new URL(imgbb_url);
   HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -92,4 +72,27 @@ void uploadImage() throws IOException {
     println("Error uploading file");
   }
   upload_pending = false;
+}
+
+
+void serialEvent (Serial myPort) {
+  try {
+    while (myPort.available() > 0) {
+      String inBuffer = myPort.readStringUntil('\n');
+      if (inBuffer != null) {
+        try {
+          int val = 0;
+          String s = inBuffer.replace("\n", "");
+          val = Integer.parseInt(s.trim());
+          if (val == 1) actionBouton();
+          println("valeur transmise par le port série : " + val);
+        }
+        catch (NumberFormatException npe) {
+          // Not an integer so forget it
+        }
+      }
+    }
+  }
+  catch (Exception e) {
+  }
 }

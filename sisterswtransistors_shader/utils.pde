@@ -6,6 +6,7 @@ CallbackListener toFront = new CallbackListener() {
   }
 };
 
+
 CallbackListener close = new CallbackListener() {
   public void controlEvent(CallbackEvent theEvent) {
     ((ScrollableList)theEvent.getController()).close();
@@ -30,7 +31,6 @@ float smoothstep(float x) {
   x = constrain(x, 0f, 1f);
   return x * x * (3 - 2 * x);
 }
-
 
 HashMap<String, color[]> buildGradients() {
   color[] rainbow = {#ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff};
