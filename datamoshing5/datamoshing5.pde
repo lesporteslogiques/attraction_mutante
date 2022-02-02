@@ -59,7 +59,7 @@ String SKETCH_NAME = getClass().getSimpleName();
 // PARAMETERS
 //
 int REFRESH_INTERVAL = 14000;
-float START_DISPLACEMENT = 10.0;
+float START_DISPLACEMENT = 0.0;
 float SPEED = 0.4;
 boolean INVERT_COLORS = false;
 
@@ -83,7 +83,6 @@ void setup() {
   volume.input(micro);           // Brancher l'entrée micro sur l'analyseur de volume
 
   son_camera = new SoundFile(this, "freesound-roachpowder-camera-shutter.wav");
-  son_camera.play();             // Jouer un coup au démarrage pour test
   
   printArray(Serial.list());     // Afficher sur la console la liste des ports série utilisés
   String nom_port = Serial.list()[1];  // Attention à choisir le bon port série!
@@ -114,9 +113,9 @@ void setup() {
 void updateDisplacementMap(PVector[] vector_map, PImage map_img) {
   map_img.loadPixels();
   float x_off, y_off;
-  for (int j=0; j<height; j++) {
-    for (int i=0; i<width; i++) {
-      index = i + width*j;
+  for (int j=0; j<cam.height; j++) {
+    for (int i=0; i<cam.width; i++) {
+      index = i + cam.width*j;
       color displacementPix = map_img.pixels[index];
       // Use red channel for horizontal displacement
       // and green channel for vertical displacement
@@ -142,20 +141,20 @@ void draw() {
   
   loadPixels();
   index = 0;
-  for (int j=0; j<height; j++) {
-    for (int i=0; i<width; i++) {
+  for (int j=0; j <cam.height; j++) {
+    for (int i=0; i <cam.width; i++) {
       source_x = amp * vectorMap[index].x + i;
       source_y = amp * vectorMap[index].y + j;
       while (source_x < 0)
-        source_x += width;
-      while (source_x >= width)
-        source_x -= width;
+        source_x += cam.width;
+      while (source_x >= cam.width)
+        source_x -= cam.width;
       while (source_y < 0)
-        source_y += height;
-      while (source_y >= height)
-        source_y -= height;
+        source_y += cam.height;
+      while (source_y >= cam.height)
+        source_y -= cam.height;
       
-      pixels[index] = source_img.pixels[width*floor(source_y) + floor(source_x)];
+      pixels[index] = source_img.pixels[cam.width*floor(source_y) + floor(source_x)];
       
       index++;
     }

@@ -71,7 +71,7 @@ void uploadImage() {
 
     String paramString = "key=" + imgbb_api_key + "&";
     paramString += "name=" + URLEncoder.encode(imageBasename, "UTF-8") + "&";
-    //paramString += "image=" + URLEncoder.encode(Base64.getEncoder().encodeToString(allBytes), "UTF-8");
+    paramString += "image=" + URLEncoder.encode(Base64.getEncoder().encodeToString(allBytes), "UTF-8");
 
     DataOutputStream out = new DataOutputStream(con.getOutputStream());
     out.writeBytes(paramString);
