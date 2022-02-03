@@ -8,10 +8,10 @@ void buildUI() {
   
   cp5 = new ControlP5(this);
   cp5.addSlider("speed").setPosition(20, 50).setWidth(400).setValue(0.5).setRange(-10, 10);
-  cp5.addSlider("noise_detail").setPosition(20, 100).setWidth(400).setValue(0.5).setRange(0, 10);
   cp5.addSlider("cam_factor").setPosition(20, 150).setWidth(400).setValue(0.5).setRange(0, 1);
   cp5.addSlider("noise_factor").setPosition(20, 200).setWidth(400).setValue(0.5).setRange(0, 1);
-  cp5.addSlider("s5").setPosition(20, 250).setWidth(400).setValue(0.5).setRange(0, 1);
+  cp5.addSlider("noise_detail").setPosition(20, 100).setWidth(400).setValue(0.5).setRange(0, 10);
+  //cp5.addSlider("slider5").setPosition(20, 250).setWidth(400).setValue(0.5).setRange(0, 1);
 }
 
 
@@ -38,10 +38,12 @@ void noise_factor(float v) {
   println("param4 : " + noise_factor);
 }
 
-void s5(float v) {
+/*
+void slider(float v) {
   param5 = v;
   println("sss5 : " + param5);
 }
+*/
 
 
 
@@ -118,7 +120,7 @@ void uploadImage() {
 
     String paramString = "key=" + imgbb_api_key + "&";
     paramString += "name=" + URLEncoder.encode(imageBasename, "UTF-8") + "&";
-    //paramString += "image=" + URLEncoder.encode(Base64.getEncoder().encodeToString(allBytes), "UTF-8");
+    paramString += "image=" + URLEncoder.encode(Base64.getEncoder().encodeToString(allBytes), "UTF-8");
 
     DataOutputStream out = new DataOutputStream(con.getOutputStream());
     out.writeBytes(paramString);
