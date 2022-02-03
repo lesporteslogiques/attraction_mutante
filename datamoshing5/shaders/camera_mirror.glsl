@@ -12,6 +12,9 @@ uniform float u_wmargin;
 uniform sampler2D u_camera;
 uniform sampler2D u_displacement;
 uniform float u_amp;
+uniform float u_noise_detail;
+uniform float u_noise_factor;
+uniform float u_cam_factor;
 
 
 float random(vec2 coord)
@@ -46,9 +49,9 @@ void main() {
     
     vec2 position = (gl_FragCoord.xy - vec2(u_wmargin, 0)) / u_resolution.xy;
     position = vec2(1.) - position;
-    vec2 rnd_displacement = vec2(noise(position), noise(2. * position.yx)) - vec2(0.5);
+    vec2 rnd_displacement = vec2(noise(position), noise(u_noise_detail * position.yx)) - vec2(0.5);
     vec2 pos_displacement = texture2D(u_displacement, position).rg - vec2(0.5);
-    vec2 mix_displacement = 0. * pos_displacement + 0.1 * rnd_displacement;
+    vec2 mix_displacement = u_cam_factor * pos_displacement + u_noise_factor * rnd_displacement;
     vec2 new_position = position + 0.01 * u_amp * mix_displacement;
     vec3 videoRGB = texture2D(u_camera, fract(new_position)).rgb;
     
