@@ -1,4 +1,43 @@
+// Config *************************************
+boolean UPLOAD_ON = true; // false pour annuler l'envoi des images sur le web
+
+// Paramètres *********************************
+import controlP5.*;
+ControlP5 cp5;
+
+
+// Pour l'entrée micro ************************
+import processing.sound.*;
+AudioIn micro;
+Amplitude volume;
+boolean lissage = false;
+float facteur_de_lissage = 0.25;
+float niveau_sonore;
+
+// Pour la connexion série avec arduino *******
+import processing.serial.*;
+Serial arduino;
+boolean bascule_bouton = true;
+
+// Pour la webcam *****************************
 import processing.video.*;
+Capture cam;
+PGraphics cam_inverse;
+
+// Pour l'upload ******************************
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.net.URL;
+import java.util.Base64;
+
+String imgbb_url = "https://api.imgbb.com/1/upload";
+
+
+// Pour la sauvegarde des fichiers *************
+import java.util.Date;
+import java.text.SimpleDateFormat;
+String SKETCH_NAME = getClass().getSimpleName();
 
 //
 // PARAMETERS

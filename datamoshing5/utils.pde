@@ -11,12 +11,12 @@ void buildUI() {
   cp5.addSlider("cam_factor").setPosition(20, 150).setWidth(400).setValue(0.5).setRange(0, 1);
   cp5.addSlider("noise_factor").setPosition(20, 200).setWidth(400).setValue(0.5).setRange(0, 1);
   cp5.addSlider("noise_detail").setPosition(20, 100).setWidth(400).setValue(0.5).setRange(0, 10);
-  //cp5.addSlider("slider5").setPosition(20, 250).setWidth(400).setValue(0.5).setRange(0, 1);
+  cp5.addSlider("color_rot").setPosition(20, 250).setWidth(400).setValue(0).setRange(-PI, PI);
 }
 
 
 
-float speed, noise_detail, cam_factor, noise_factor, param5;
+float speed, noise_detail, cam_factor, noise_factor, color_rot;
 
 void speed(float v) {
   speed = v;
@@ -35,15 +35,15 @@ void cam_factor(float v) {
 
 void noise_factor(float v) {
   noise_factor = v;
-  println("param4 : " + noise_factor);
+  println("noise_factor : " + noise_factor);
 }
 
-/*
-void slider(float v) {
-  param5 = v;
-  println("sss5 : " + param5);
+
+void color_rot(float v) {
+  color_rot = v;
+  println("color_rot : " + color_rot);
 }
-*/
+
 
 
 

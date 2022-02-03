@@ -19,8 +19,6 @@ ControlP5 cp5;
 import processing.sound.*;
 AudioIn micro;
 Amplitude volume;
-boolean lissage = false;
-float facteur_de_lissage = 0.25;
 float niveau_sonore;
 
 // Pour la connexion série avec arduino *******
@@ -50,17 +48,16 @@ String SKETCH_NAME = getClass().getSimpleName();
 // PARAMETERS
 //
 int REFRESH_INTERVAL = 24000;
-float START_DISPLACEMENT = 0.0;
-boolean INVERT_COLORS = false;
 
 PShader shader;
 float rect_w, margin;
 
-PVector[] vectorMap;
 PImage displacement;
-float source_x, source_y;
 float amp;
 int last_update;
+
+float[] volumes = new float[16];
+int volumes_idx = 0;
 
 
 void setup() {
@@ -98,17 +95,19 @@ void setup() {
   imgbb_api_key = get_api_key();
   upload_en_cours = loadImage("cloud_upload.png");
 
+  displacement = createImage(cam.width, cam.height, RGB);
 
-  /*
   while (!cam.available()) {
-   delay(100);
-   }
-   cam.read();*/
-  shader.set("u_displacement", cam);
-  shader.set("u_amp", 1f);
-  amp = START_DISPLACEMENT;
+    delay(100);
+  }
+  cam.read();
+  //cam.loadPixels();
+  cam.updatePixels();
+  displacement = cam.copy();
+  shader.set("u_displacement", displacement);
   last_update = millis();
-
+  
+  noStroke();
   buildUI();
 }
 
@@ -117,22 +116,24 @@ void draw() {
   if (cam.available()) {
     cam.read();
     shader.set("u_camera", cam);
-    //cam.loadPixels();
-    //updateDisplacementMap(vectorMap, cam);
-    /*
-    if (millis() - last_update > REFRESH_INTERVAL) {
-     last_update = millis();
-     amp = START_DISPLACEMENT;
-     shader.set("u_displacement", cam);
-     }*/
   }
   
+  niveau_sonore = 0f;
+  volumes[volumes_idx++] = volume.analyze();
+  if (volumes_idx >= volumes.length) volumes_idx=0;
+  for (float vol : volumes)
+    niveau_sonore += vol;
+  niveau_sonore /= volumes.length;
+  
+  
+
   amp += speed;
   
   shader.set("u_amp", amp);
   shader.set("u_noise_detail", noise_detail);
   shader.set("u_cam_factor", cam_factor);
-  shader.set("u_noise_factor", noise_factor);
+  shader.set("u_noise_factor", noise_factor * 10f * niveau_sonore);
+  shader.set("u_color_rot", color_rot);
 
   background(0);
   shader(shader);
@@ -149,6 +150,9 @@ void draw() {
 }
 
 void mouseClicked() {
-  amp = START_DISPLACEMENT;
-  shader.set("u_displacement", cam);
+  amp = 0f;
+  cam.loadPixels();
+  cam.updatePixels();
+  displacement = cam.copy();
+  shader.set("u_displacement", displacement);
 }

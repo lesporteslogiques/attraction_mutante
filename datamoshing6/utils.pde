@@ -1,8 +1,72 @@
+SoundFile son_camera;
+
+void buildUI() {
+  son_camera = new SoundFile(this, "freesound-roachpowder-camera-shutter.wav");
+  son_camera.play();             // Jouer un coup au démarrage pour test
+  
+  upload_en_cours = loadImage("cloud_upload.png");
+  
+  cp5 = new ControlP5(this);
+  cp5.addSlider("speed").setPosition(20, 50).setWidth(400).setValue(0.5).setRange(-10, 10);
+  cp5.addSlider("cam_factor").setPosition(20, 150).setWidth(400).setValue(0.5).setRange(0, 1);
+  cp5.addSlider("noise_factor").setPosition(20, 200).setWidth(400).setValue(0.5).setRange(0, 1);
+  cp5.addSlider("noise_detail").setPosition(20, 100).setWidth(400).setValue(0.5).setRange(0, 10);
+  //cp5.addSlider("slider5").setPosition(20, 250).setWidth(400).setValue(0.5).setRange(0, 1);
+}
+
+
+
+float speed, noise_detail, cam_factor, noise_factor, param5;
+
+void speed(float v) {
+  speed = v;
+  println("speed : " + speed);
+}
+
+void noise_detail(float v) {
+  noise_detail = v;
+  println("noise_detail : " + noise_detail);
+}
+
+void cam_factor(float v) {
+  cam_factor = v;
+  println("cam_factor : " + cam_factor);
+}
+
+void noise_factor(float v) {
+  noise_factor = v;
+  println("param4 : " + noise_factor);
+}
+
+/*
+void slider(float v) {
+  param5 = v;
+  println("sss5 : " + param5);
+}
+*/
+
+
+
+boolean display_param = true;
+
+void keyPressed() {
+  if (key == ' ') display_param = !display_param;
+  if (!display_param) cp5.hide();
+  if (display_param) cp5.show();
+  
+  if (key == 'b')
+    actionBouton();
+}
+
+
+
+String imgbb_api_key;
 
 String get_api_key() {
   String[] lines = loadStrings("api.txt");
   return lines[0];
 }
+
 
 
 String imageBasename;
@@ -29,47 +93,56 @@ void actionBouton() {
 }
 
 
-void uploadImage() throws IOException {
+
+boolean upload_pending = false;
+PImage upload_en_cours;
+float upload_started;
+
+void uploadImage() {
   upload_pending = true;
   upload_started = millis();
+  int status = 0;
 
-  URL url = new URL(imgbb_url);
-  HttpURLConnection con = (HttpURLConnection) url.openConnection();
-  con.setDoOutput(true);
-  con.setRequestMethod("POST");
-  //con.setRequestProperty("Content-Type", "application/json");
+  try {
+    URL url = new URL(imgbb_url);
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    con.setDoOutput(true);
+    con.setRequestMethod("POST");
+    //con.setRequestProperty("Content-Type", "application/json");
 
-  File imgFile = sketchFile(imagefilename);
-  long fileSize = imgFile.length();
-  byte[] allBytes = new byte[(int) fileSize];
-  FileInputStream fis = new FileInputStream(imgFile);
-  BufferedInputStream reader = new BufferedInputStream(fis);
-  reader.read(allBytes);
-  reader.close();
+    File imgFile = sketchFile(imagefilename);
+    long fileSize = imgFile.length();
+    byte[] allBytes = new byte[(int) fileSize];
+    FileInputStream fis = new FileInputStream(imgFile);
+    BufferedInputStream reader = new BufferedInputStream(fis);
+    reader.read(allBytes);
+    reader.close();
 
-  String paramString = "key=" + imgbb_api_key + "&";
-  paramString += "name=" + URLEncoder.encode(imageBasename, "UTF-8") + "&";
-  paramString += "image=" + URLEncoder.encode(Base64.getEncoder().encodeToString(allBytes), "UTF-8");
+    String paramString = "key=" + imgbb_api_key + "&";
+    paramString += "name=" + URLEncoder.encode(imageBasename, "UTF-8") + "&";
+    paramString += "image=" + URLEncoder.encode(Base64.getEncoder().encodeToString(allBytes), "UTF-8");
 
-  DataOutputStream out = new DataOutputStream(con.getOutputStream());
-  out.writeBytes(paramString);
-  out.flush();
-  out.close();
+    DataOutputStream out = new DataOutputStream(con.getOutputStream());
+    out.writeBytes(paramString);
+    out.flush();
+    out.close();
 
-  int status = con.getResponseCode();
-  BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-  String inputLine;
-  StringBuilder content = new StringBuilder();
-  while ((inputLine = in.readLine()) != null) {
-    content.append(inputLine);
+    status = con.getResponseCode();
+    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    String inputLine;
+    StringBuilder content = new StringBuilder();
+    while ((inputLine = in.readLine()) != null) {
+      content.append(inputLine);
+    }
+    in.close();
+    println(content.toString());
   }
-  in.close();
-  println(content.toString());
-
-  if (status == 200) {
-    println("Uploading done");
-  } else {
-    println("Error uploading file");
+  catch (IOException ex) {
+    if (status == 200) {
+      println("Uploading done");
+    } else {
+      println("Error uploading file");
+    }
   }
   upload_pending = false;
 }
