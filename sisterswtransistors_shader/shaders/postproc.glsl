@@ -21,7 +21,7 @@ void main() {
     bool inVideoMask = length(videoRgb) < threshold;
     
     if (inVideoMask) {
-	    gl_FragColor = vec4(0., 0., 0., 1.);
+	    gl_FragColor = vec4(0., 0., 0., 0.8);
 	} else {
 	    gl_FragColor = vec4(0.);
 	}

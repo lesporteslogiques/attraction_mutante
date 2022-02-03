@@ -1,8 +1,70 @@
+SoundFile son_camera;
+
+void buildUI() {
+  son_camera = new SoundFile(this, "freesound-roachpowder-camera-shutter.wav");
+  son_camera.play();             // Jouer un coup au démarrage pour test
+  
+  upload_en_cours = loadImage("cloud_upload.png");
+  
+  cp5 = new ControlP5(this);
+  cp5.addSlider("slider1").setPosition(20, 50).setWidth(400).setValue(0.5).setRange(0, 1);
+  cp5.addSlider("slider2").setPosition(20, 100).setWidth(400).setValue(0.5).setRange(0, 1);
+  cp5.addSlider("slider3").setPosition(20, 150).setWidth(400).setValue(0.5).setRange(0, 1);
+  cp5.addSlider("slider4").setPosition(20, 200).setWidth(400).setValue(0.5).setRange(0, 1);
+  cp5.addSlider("slider5").setPosition(20, 250).setWidth(400).setValue(0.5).setRange(0, 1);
+}
+
+
+
+float param1, param2, param3, param4, param5;
+
+void slider1(float v) {
+  param1 = v;
+  println("param1 : " + param1);
+}
+
+void slider2(float v) {
+  param2 = v;
+  println("param2 : " + param2);
+}
+
+void slider3(float v) {
+  param3 = v;
+  println("param3 : " + param3);
+}
+
+void slider4(float v) {
+  param4 = v;
+  println("param4 : " + param4);
+}
+
+void slider5(float v) {
+  param5 = v;
+  println("param5 : " + param5);
+}
+
+
+
+boolean display_param = true;
+
+void keyPressed() {
+  if (key == ' ') display_param = !display_param;
+  if (!display_param) cp5.hide();
+  if (display_param) cp5.show();
+  
+  if (key == 'b')
+    actionBouton();
+}
+
+
+
+String imgbb_api_key;
 
 String get_api_key() {
   String[] lines = loadStrings("api.txt");
   return lines[0];
 }
+
 
 
 String imageBasename;
@@ -28,6 +90,11 @@ void actionBouton() {
   }
 }
 
+
+
+boolean upload_pending = false;
+PImage upload_en_cours;
+float upload_started;
 
 void uploadImage() {
   upload_pending = true;

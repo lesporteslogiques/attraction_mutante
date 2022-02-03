@@ -7,9 +7,9 @@
 
 import processing.video.*;
 
+Capture cam;
 
 PShader shader;
-Capture cam;
 float rect_w, margin;
 
 
@@ -36,7 +36,7 @@ void draw() {
     shader.set("u_video", cam);
   }
   
-
+  
   background(0);
   
   shader(shader);

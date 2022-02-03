@@ -1,3 +1,14 @@
+void keyPressed() {
+  /*
+  if (key == ' ') display_param = !display_param;
+  if (!display_param) cp5.hide();
+  if (display_param) cp5.show();
+  */
+  
+  if (key == 'b')
+    actionBouton();
+}
+
 
 String get_api_key() {
   String[] lines = loadStrings("api.txt");

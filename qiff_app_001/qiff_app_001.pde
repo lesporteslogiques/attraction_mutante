@@ -23,8 +23,7 @@ boolean UPLOAD_ON = true; // false pour annuler l'envoi des images sur le web
 // Paramètres *********************************
 import controlP5.*;
 ControlP5 cp5;
-float param1, param2, param3, param4, param5;
-boolean display_param = true;
+
 
 // Pour l'entrée micro ************************
 import processing.sound.*;
@@ -33,8 +32,6 @@ Amplitude volume;
 boolean lissage = false;
 float facteur_de_lissage = 0.25;
 float niveau_sonore;
-// Et jouer un son
-SoundFile son_camera;
 
 // Pour la connexion série avec arduino *******
 import processing.serial.*;
@@ -44,7 +41,6 @@ boolean bascule_bouton = true;
 // Pour la webcam *****************************
 import processing.video.*;
 Capture cam;
-//PImage cam_inverse;
 PGraphics cam_inverse;
 
 // Pour l'upload ******************************
@@ -53,11 +49,9 @@ import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.net.URL;
 import java.util.Base64;
-String imgbb_api_key;
+
 String imgbb_url = "https://api.imgbb.com/1/upload";
-boolean upload_pending = false;
-PImage upload_en_cours;
-float upload_started;
+
 
 // Pour la sauvegarde des fichiers *************
 import java.util.Date;
@@ -79,9 +73,6 @@ public void setup() {
   volume = new Amplitude(this);  // Démarrer l'analyseur de volume
   volume.input(micro);           // Brancher l'entrée micro sur l'analyseur de volume
 
-  son_camera = new SoundFile(this, "freesound-roachpowder-camera-shutter.wav");
-  son_camera.play();             // Jouer un coup au démarrage pour test
-
   printArray(Serial.list());     // Afficher sur la console la liste des ports série utilisés
   String nom_port = Serial.list()[1];  // Attention à choisir le bon port série!
   arduino = new Serial(this, nom_port, 9600);
@@ -95,15 +86,10 @@ public void setup() {
   cam_inverse = createGraphics(cam.width, cam.height);
   
   imgbb_api_key = get_api_key();
-  upload_en_cours = loadImage("cloud_upload.png");
 
-  cp5 = new ControlP5(this);
-  cp5.addSlider("slider1").setPosition(20, 50).setWidth(400).setValue(0.5).setRange(0, 1);
-  cp5.addSlider("slider2").setPosition(20, 100).setWidth(400).setValue(0.5).setRange(0, 1);
-  cp5.addSlider("slider3").setPosition(20, 150).setWidth(400).setValue(0.5).setRange(0, 1);
-  cp5.addSlider("slider4").setPosition(20, 200).setWidth(400).setValue(0.5).setRange(0, 1);
-  cp5.addSlider("slider5").setPosition(20, 250).setWidth(400).setValue(0.5).setRange(0, 1);
+  buildUI();
 }
+
 
 public void draw() {
 
@@ -152,37 +138,4 @@ public void draw() {
     if ((frameCount / 20) % 2 == 0)
       image(upload_en_cours, (width - upload_en_cours.width) / 2, (height - upload_en_cours.height) / 2);
   }
-}
-
-
-
-void slider1(float v) {
-  param1 = v;
-  println("param1 : " + param1);
-}
-
-void slider2(float v) {
-  param2 = v;
-  println("param2 : " + param2);
-}
-
-void slider3(float v) {
-  param3 = v;
-  println("param3 : " + param3);
-}
-
-void slider4(float v) {
-  param4 = v;
-  println("param4 : " + param4);
-}
-
-void slider5(float v) {
-  param5 = v;
-  println("param5 : " + param5);
-}
-
-void keyPressed() {
-  if (key == ' ') display_param = !display_param;
-  if (!display_param) cp5.hide();
-  if (display_param) cp5.show();
 }
