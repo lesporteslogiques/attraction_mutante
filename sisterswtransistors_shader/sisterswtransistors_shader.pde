@@ -20,6 +20,7 @@
 
 // Config *************************************
 boolean UPLOAD_ON = true; // false pour annuler l'envoi des images sur le web
+boolean ARDUINO_ON = false;  // true si le l'interface bouton (par arduino) est relié
 
 // Paramètres *********************************
 import controlP5.*;
@@ -99,10 +100,12 @@ void setup() {
   son_camera = new SoundFile(this, "freesound-roachpowder-camera-shutter.wav");
   son_camera.play();             // Jouer un coup au démarrage pour test
 
-  printArray(Serial.list());     // Afficher sur la console la liste des ports série utilisés
-  String nom_port = Serial.list()[1];  // Attention à choisir le bon port série!
-  //arduino = new Serial(this, nom_port, 9600);
-  //arduino.bufferUntil('\n');
+  if (ARDUINO_ON) {
+    printArray(Serial.list());     // Afficher sur la console la liste des ports série utilisés
+    String nom_port = Serial.list()[1];  // Attention à choisir le bon port série!
+    arduino = new Serial(this, nom_port, 9600);
+    arduino.bufferUntil('\n');
+  }
 
   String[] cameras = Capture.list();
   printArray(cameras);
