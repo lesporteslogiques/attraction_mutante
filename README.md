@@ -11,10 +11,10 @@ Exemple de sketch minimal pour utiliser un shader GLSL pour redimensioner et inv
 ### Temporal Face Glitch
 Fait apparaître des visages du passé lorsqu'on regarde la camera en face.\
 L'idée me paraissait marrante mais peu d'intérêt pour l'utilisateur d'uploader les photos...\
-Nécessite la librairie OpenCV.\
+Nécessite la librairie OpenCV.
 
 ### Sisters with Transistors
-Effet inspiré du documentaire "Sisters with Transistors".\
+Effet inspiré du documentaire "Sisters with Transistors".
 
 ### Datamoshing5
-Effet datamoshing\
+Effet datamoshing
