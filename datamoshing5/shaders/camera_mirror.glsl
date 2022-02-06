@@ -12,10 +12,12 @@ uniform float u_wmargin;
 uniform sampler2D u_camera;
 uniform sampler2D u_displacement;
 uniform float u_amp;
+uniform float u_time;
 uniform float u_noise_detail;
 uniform float u_noise_factor;
 uniform float u_cam_factor;
 uniform float u_color_rot;
+
 
 
 float random(vec2 coord)
@@ -23,7 +25,8 @@ float random(vec2 coord)
     return fract(sin(dot(coord.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
-float noise(in vec2 coord) {
+
+float noise(vec2 coord) {
     vec2 i = floor(coord);
     vec2 f = fract(coord);
 
@@ -43,6 +46,17 @@ float noise(in vec2 coord) {
     return mix(a, b, u.x) +
             (c - a)* u.y * (1.0 - u.x) +
             (d - b) * u.x * u.y;
+}
+
+
+mat2 rotation2d(float a) {
+    float c=cos(a);
+    float s=sin(a);
+    return mat2(c,-s,s,c);
+}
+
+vec2 rotate(vec2 v, float angle) {
+	return rotation2d(angle) * v;
 }
 
 
@@ -69,7 +83,8 @@ void main() {
     
     vec2 position = (gl_FragCoord.xy - vec2(u_wmargin, 0)) / u_resolution.xy;
     position = vec2(1.) - position;
-    vec2 rnd_displacement = vec2(noise(position), noise(u_noise_detail * position.yx)) - vec2(0.5);
+    vec2 rnd_displacement = vec2(noise(rotate(u_noise_detail * position, u_time)),
+                                 noise(rotate(u_noise_detail * position.yx, u_time))) - vec2(0.5);
     vec2 pos_displacement = texture2D(u_displacement, position).rg - vec2(0.5);
     vec2 mix_displacement = u_cam_factor * pos_displacement + u_noise_factor * rnd_displacement;
     vec2 new_position = position + 0.01 * u_amp * mix_displacement;

@@ -49,15 +49,16 @@ String SKETCH_NAME = getClass().getSimpleName();
 // PARAMETERS
 //
 int REFRESH_INTERVAL = 24000;
+float speed, noise_detail, cam_factor, noise_factor;
+float color_rot = 0;
 
 PShader shader;
 float rect_w, margin;
 
-PImage displacement;
 float amp;
 int last_update;
 
-float[] volumes = new float[16];
+float[] volumes = new float[32];
 int volumes_idx = 0;
 
 
@@ -97,18 +98,15 @@ void setup() {
 
   imgbb_api_key = get_api_key();
   upload_en_cours = loadImage("cloud_upload.png");
-
-  displacement = createImage(cam.width, cam.height, RGB);
-
+  
+  /*
   while (!cam.available()) {
     delay(100);
   }
   cam.read();
   //cam.loadPixels();
-  cam.updatePixels();
-  displacement = cam.copy();
-  shader.set("u_displacement", displacement);
-  last_update = millis();
+  cam.updatePixels();*/
+  shader.set("u_displacement", cam);
   
   noStroke();
   buildUI();
@@ -129,13 +127,28 @@ void draw() {
   niveau_sonore /= volumes.length;
   
   
-
+  speed = cos(millis() * 0.00002f);
+  println(speed);
   amp += speed;
   
+  
+  cam_factor = 0.2f + 0.2f * sin(millis() * 0.00008f);
+  
+  noise_factor = 0.5f + 0.5f * sin(millis() * 0.0001f);
+  noise_factor *= 2f * niveau_sonore;
+  
+  noise_detail = 1.1f + cos(millis() * 0.00011f);
+  noise_detail *= 2;
+  
+  color_rot += 0.01f;
+  if (color_rot >= TWO_PI)
+    color_rot -= TWO_PI;
+  
   shader.set("u_amp", amp);
+  shader.set("u_time", millis()*0.0001f);  
   shader.set("u_noise_detail", noise_detail);
   shader.set("u_cam_factor", cam_factor);
-  shader.set("u_noise_factor", noise_factor * 10f * niveau_sonore);
+  shader.set("u_noise_factor", noise_factor);
   shader.set("u_color_rot", color_rot);
 
   background(0);
@@ -152,10 +165,10 @@ void draw() {
   }
 }
 
+/*
 void mouseClicked() {
   amp = 0f;
   cam.loadPixels();
   cam.updatePixels();
-  displacement = cam.copy();
   shader.set("u_displacement", displacement);
-}
+}*/

@@ -7,42 +7,42 @@ void buildUI() {
   upload_en_cours = loadImage("cloud_upload.png");
   
   cp5 = new ControlP5(this);
-  cp5.addSlider("speed").setPosition(20, 50).setWidth(400).setValue(0.5).setRange(-10, 10);
-  cp5.addSlider("cam_factor").setPosition(20, 150).setWidth(400).setValue(0.5).setRange(0, 1);
-  cp5.addSlider("noise_factor").setPosition(20, 200).setWidth(400).setValue(0.5).setRange(0, 1);
-  cp5.addSlider("noise_detail").setPosition(20, 100).setWidth(400).setValue(0.5).setRange(0, 10);
-  cp5.addSlider("color_rot").setPosition(20, 250).setWidth(400).setValue(0).setRange(-PI, PI);
+  //cp5.addSlider("speed").setPosition(20, 50).setWidth(400).setValue(0.5).setRange(-10, 10);
+  //cp5.addSlider("cam_factor").setPosition(20, 150).setWidth(400).setValue(0.5).setRange(0, 1);
+  //cp5.addSlider("noise_factor").setPosition(20, 200).setWidth(400).setValue(0.5).setRange(0, 1);
+  //cp5.addSlider("noise_detail").setPosition(20, 100).setWidth(400).setValue(0.5).setRange(0, 10);
+  //cp5.addSlider("color_rot").setPosition(20, 250).setWidth(400).setValue(0).setRange(-PI, PI);
 }
 
-
-
-float speed, noise_detail, cam_factor, noise_factor, color_rot;
-
+/*
 void speed(float v) {
   speed = v;
   println("speed : " + speed);
-}
+}*/
 
+/*
 void noise_detail(float v) {
   noise_detail = v;
   println("noise_detail : " + noise_detail);
-}
+}*/
 
+/*
 void cam_factor(float v) {
   cam_factor = v;
   println("cam_factor : " + cam_factor);
-}
+}*/
 
+/*
 void noise_factor(float v) {
   noise_factor = v;
   println("noise_factor : " + noise_factor);
-}
+}*/
 
-
+/*
 void color_rot(float v) {
   color_rot = v;
   println("color_rot : " + color_rot);
-}
+}*/
 
 
 
