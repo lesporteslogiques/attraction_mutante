@@ -27,6 +27,6 @@ void clicBouton() {
   m = !m; 
   digitalWrite(13, m);
   // Envoyer le message sur le port série
-  Serial.println("1");
+  Serial.println("1"); // Important : 1 est la valeur traitée par processing
 }
 
