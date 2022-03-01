@@ -148,3 +148,32 @@ PGraphics rotationBuffer(int orientation) {
   }
   return ir;
 }
+
+void rotationBufferMogrify(int orientation, String imagefilename) {
+
+  if (orientation == 1) {
+    Process p = exec("/usr/bin/mogrify", "-rotate", "270", sketchPath(imagefilename));
+    try {
+      int result = p.waitFor();
+      println("the process returned " + result);
+    }
+    catch (InterruptedException e) {
+    }
+  } else if (orientation == 2) {
+    Process p = exec("/usr/bin/mogrify", "-rotate", "90", sketchPath(imagefilename));
+    try {
+      int result = p.waitFor();
+      println("the process returned " + result);
+    }
+    catch (InterruptedException e) {
+    }
+  } else if (orientation == 3) {
+    Process p = exec("/usr/bin/mogrify", "-rotate", "180", sketchPath(imagefilename));
+    try {
+      int result = p.waitFor();
+      println("the process returned " + result);
+    }
+    catch (InterruptedException e) {
+    }
+  }
+}
