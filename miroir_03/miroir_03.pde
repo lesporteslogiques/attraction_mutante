@@ -5,7 +5,7 @@ static int[] screen_size = {1024, 768};
 
 AudioIn input;
 Amplitude analyzer;
-float volume_threshold = 0.2;
+float volume_threshold = 0.1;
 float extra_time = 0.0;
 float amplitude = 0.0;
 
@@ -49,10 +49,10 @@ void draw() {
   float volume = analyzer.analyze();
   volume = max(volume, volume_threshold) - volume_threshold;
   if(volume > 0.0){
-    amplitude = min(amplitude + 0.01, 0.7);
+    amplitude = min(amplitude + 0.001, 0.7);
   }
   else{
-    amplitude = max(amplitude - 0.005, 0.0);
+    amplitude = max(amplitude - 0.0005, 0.0);
   }
   float timer = millis() / 1000.0;
   //display + effects
@@ -61,4 +61,15 @@ void draw() {
   shader.set("u_amplitude", amplitude);
   shader(shader);
   rect(0, 0, width, height);
+}
+
+void keyPressed(){
+  if (key == CODED) {
+    if (keyCode == UP) {
+      volume_threshold = min(1.0, volume_threshold + 0.01);
+    } else if (keyCode == DOWN) {
+      volume_threshold = max(0.0, volume_threshold - 0.01);;
+    } 
+  }
+  print("seuil = " + volume_threshold + " ; ");
 }

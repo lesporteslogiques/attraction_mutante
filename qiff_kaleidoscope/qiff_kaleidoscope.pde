@@ -44,7 +44,7 @@ float[] volumes = new float[taille_buffeur_lissage];
 int volumes_idx = 0;
 float niveau_sonore;
 
-float volume_threshold = 0.2;
+float volume_threshold = 0.1;
 float extra_time = 0.0;
 
 // Sons ***************************************
@@ -264,4 +264,12 @@ void keyPressed() {
     cursor();
   }
   if (key == 'b') actionBouton();
+  if (key == CODED) {
+    if (keyCode == UP) {
+      volume_threshold = min(1.0, volume_threshold + 0.01);
+    } else if (keyCode == DOWN) {
+      volume_threshold = max(0.0, volume_threshold - 0.01);;
+    }
+  }
+  print("seuil = " + volume_threshold + " ; ");
 }

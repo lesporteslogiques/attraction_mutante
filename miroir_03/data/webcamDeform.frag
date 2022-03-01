@@ -10,7 +10,7 @@ uniform float u_time;
 uniform float u_amplitude;
 
 float power = 0.2;
-float speed = 4.0;
+float speed = 3.0;
 float freq = 5.0;
 
 //effect using polar coord (round shape)
