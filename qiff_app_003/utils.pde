@@ -1,100 +1,44 @@
-SoundFile son_camera;
-
-void buildUI() {
-  son_camera = new SoundFile(this, "freesound-roachpowder-camera-shutter.wav");
-  son_camera.play();             // Jouer un coup au démarrage pour test
-  
-  upload_en_cours = loadImage("cloud_upload.png");
-  
-  cp5 = new ControlP5(this);
-  cp5.addSlider("slider1").setPosition(20, 50).setWidth(400).setValue(0.5).setRange(0, 1);
-  cp5.addSlider("slider2").setPosition(20, 100).setWidth(400).setValue(0.5).setRange(0, 1);
-  cp5.addSlider("slider3").setPosition(20, 150).setWidth(400).setValue(0.5).setRange(0, 1);
-  cp5.addSlider("slider4").setPosition(20, 200).setWidth(400).setValue(0.5).setRange(0, 1);
-  cp5.addSlider("slider5").setPosition(20, 250).setWidth(400).setValue(0.5).setRange(0, 1);
-}
-
-
-
-float param1, param2, param3, param4, param5;
-
-void slider1(float v) {
-  param1 = v;
-  println("param1 : " + param1);
-}
-
-void slider2(float v) {
-  param2 = v;
-  println("param2 : " + param2);
-}
-
-void slider3(float v) {
-  param3 = v;
-  println("param3 : " + param3);
-}
-
-void slider4(float v) {
-  param4 = v;
-  println("param4 : " + param4);
-}
-
-void slider5(float v) {
-  param5 = v;
-  println("param5 : " + param5);
-}
-
-
-
-boolean display_param = true;
-
-void keyPressed() {
-  if (key == ' ') display_param = !display_param;
-  if (!display_param) cp5.hide();
-  if (display_param) cp5.show();
-  
-  if (key == 'b')
-    actionBouton();
-}
-
-
-
-String imgbb_api_key;
 
 String get_api_key() {
   String[] lines = loadStrings("api.txt");
   return lines[0];
 }
 
+boolean api_key_exists() {
+  File f = sketchFile("api.txt");
+  // String filePath = f.getPath();
+  boolean exist = f.isFile();
+  if (exist) return true;
+  else return false;
+}
 
 
-String imageBasename;
-String imagefilename;
 
 void actionBouton() {
+  println("action bouton");
   bascule_bouton = !bascule_bouton;
   son_camera.play();
+  
+  // Pivoter l'image
+  PGraphics ir = rotationBuffer(1);
+  
+  // Enregistrer l'image dans le dossier du sketch
+  Date now = new Date();
+  SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd_HHmmss");
+  System.out.println(formater.format(now));
+  imageBasename = SKETCH_NAME + "_" + formater.format(now);
+  imagefilename = imageBasename + ".png";
+  ir.save(imagefilename);
+  
+  
   if (UPLOAD_ON) {
     if (!upload_pending) {
       println("Envoi de l'image");
-      
-      // Enregistrer l'image dans le dossier du sketch
-      Date now = new Date();
-      SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd_HHmmss");
-      System.out.println(formater.format(now));
-      imageBasename = SKETCH_NAME + "_" + formater.format(now);
-      imagefilename = imageBasename + ".png";
-      save(imagefilename);
-      
       thread("uploadImage");
     }
   }
 }
 
-
-
-boolean upload_pending = false;
-PImage upload_en_cours;
-float upload_started;
 
 void uploadImage() {
   upload_pending = true;
@@ -146,6 +90,7 @@ void uploadImage() {
 }
 
 
+
 void serialEvent (Serial myPort) {
   try {
     while (myPort.available() > 0) {
@@ -166,4 +111,40 @@ void serialEvent (Serial myPort) {
   }
   catch (Exception e) {
   }
+}
+
+
+/*
+   image originale : [v]
+ orientation 1, renvoie [>]
+ orientation 2, renvoie [<]
+ orientation 3 : renvoie [^]
+ */
+PGraphics rotationBuffer(int orientation) {
+  PGraphics ir;
+  if (orientation == 1) {
+    ir = createGraphics(height, width);
+    ir.beginDraw();
+    ir.translate(0, width);
+    ir.rotate(radians(270));
+    ir.image(g, 0, 0);
+    ir.endDraw();
+  } else if (orientation == 2) {
+    ir = createGraphics(height, width);
+    ir.beginDraw();
+    ir.translate(height, 0);
+    ir.rotate(radians(90));
+    ir.image(g, 0, 0);
+    ir.endDraw();
+  } else if (orientation == 3) {
+    ir = createGraphics(width, height);
+    ir.beginDraw();
+    ir.translate(width, height);
+    ir.rotate(radians(180));
+    ir.image(g, 0, 0);
+    ir.endDraw();
+  } else {
+    ir = createGraphics(width, height);
+  }
+  return ir;
 }
