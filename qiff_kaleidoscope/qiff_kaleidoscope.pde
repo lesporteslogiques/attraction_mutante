@@ -44,7 +44,7 @@ float[] volumes = new float[taille_buffeur_lissage];
 int volumes_idx = 0;
 float niveau_sonore;
 
-float volume_threshold = 0.2;
+float volume_threshold = 0.1;
 float extra_time = 0.0;
 
 // Sons ***************************************

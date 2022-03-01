@@ -5,7 +5,7 @@ static int[] screen_size = {1024, 768};
 
 AudioIn input;
 Amplitude analyzer;
-float volume_threshold = 0.2;
+float volume_threshold = 0.1;
 float extra_time = 0.0;
 
 Capture cam;
