@@ -14,7 +14,6 @@
  
  /!\ Clé d'API pour l'upload dans un fichier texte indépendant (api.txt)
  
- TODO : tester micro
  TODO : image miroir optionnelle
  
  */
@@ -63,6 +62,7 @@ PGraphics cam_inverse;
 
 // Shader *************************************
 PShader shader;
+PGraphics ishader;
 
 // Pour l'upload ******************************
 import java.io.*;
@@ -99,11 +99,13 @@ public void setup() {
   //size(1280, 600);
   //fullScreen();
   
+  ishader = createGraphics(screen_size[0], screen_size[1], P2D);
+  
   background(remplissage);
 
   Sound.list();                  // Liste du hardware audio
 
-  micro = new AudioIn(this, 0);  // Créer une entrée micro
+  micro = new AudioIn(this, 2);  // Créer une entrée micro
   micro.start();                 // Démarrer l'écoute du micro
   volume = new Amplitude(this);  // Démarrer l'analyseur de volume
   volume.input(micro);           // Brancher l'entrée micro sur l'analyseur de volume
@@ -209,9 +211,13 @@ public void draw() {
 
     shader.set("u_time", timer);
     shader.set("u_tex0", cam);
+    //ishader.beginDraw();
+    //ishader.shader(shader);
+    //ishader.rect(0, 0, width, height);
+    //ishader.endDraw();
+    //image(ishader,0,0);
     shader(shader);
     rect(0, 0, width, height);
-
     // Un délai est nécessaire pour éviter d'avoir l'icone d'upload dans l'image envoyé
     if (upload_pending && (millis() - upload_started > 100) ) {
       if ((frameCount / 20) % 2 == 0)

@@ -19,8 +19,6 @@ void actionBouton() {
   bascule_bouton = !bascule_bouton;
   son_camera.play();
   
-  // Pivoter l'image
-  PGraphics ir = rotationBuffer(1);
   
   // Enregistrer l'image dans le dossier du sketch
   Date now = new Date();
@@ -28,7 +26,9 @@ void actionBouton() {
   System.out.println(formater.format(now));
   imageBasename = SKETCH_NAME + "_" + formater.format(now);
   imagefilename = imageBasename + ".png";
-  ir.save(imagefilename);
+  println(imagefilename);
+  save(imagefilename);
+  rotationBufferMogrify(1, imagefilename);
   
   
   if (UPLOAD_ON) {
@@ -69,7 +69,7 @@ void uploadImage() {
     out.flush();
     out.close();
 
-    status = con.getResponseCode();
+    //status = con.getResponseCode();
     BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
     String inputLine;
     StringBuilder content = new StringBuilder();
@@ -120,31 +120,60 @@ void serialEvent (Serial myPort) {
  orientation 2, renvoie [<]
  orientation 3 : renvoie [^]
  */
-PGraphics rotationBuffer(int orientation) {
+PGraphics rotationBuffer(int orientation, PGraphics is) {
   PGraphics ir;
   if (orientation == 1) {
     ir = createGraphics(height, width);
     ir.beginDraw();
     ir.translate(0, width);
     ir.rotate(radians(270));
-    ir.image(g, 0, 0);
+    ir.image(is, 0, 0);
     ir.endDraw();
   } else if (orientation == 2) {
     ir = createGraphics(height, width);
     ir.beginDraw();
     ir.translate(height, 0);
     ir.rotate(radians(90));
-    ir.image(g, 0, 0);
+    ir.image(is, 0, 0);
     ir.endDraw();
   } else if (orientation == 3) {
     ir = createGraphics(width, height);
     ir.beginDraw();
     ir.translate(width, height);
     ir.rotate(radians(180));
-    ir.image(g, 0, 0);
+    ir.image(is, 0, 0);
     ir.endDraw();
   } else {
     ir = createGraphics(width, height);
   }
   return ir;
+}
+
+void rotationBufferMogrify(int orientation, String imagefilename) {
+
+  if (orientation == 1) {
+    Process p = exec("/usr/bin/mogrify", "-rotate", "270", sketchPath(imagefilename));
+    try {
+      int result = p.waitFor();
+      println("the process returned " + result);
+    }
+    catch (InterruptedException e) {
+    }
+  } else if (orientation == 2) {
+    Process p = exec("/usr/bin/mogrify", "-rotate", "90", sketchPath(imagefilename));
+    try {
+      int result = p.waitFor();
+      println("the process returned " + result);
+    }
+    catch (InterruptedException e) {
+    }
+  } else if (orientation == 3) {
+    Process p = exec("/usr/bin/mogrify", "-rotate", "180", sketchPath(imagefilename));
+    try {
+      int result = p.waitFor();
+      println("the process returned " + result);
+    }
+    catch (InterruptedException e) {
+    }
+  }
 }
