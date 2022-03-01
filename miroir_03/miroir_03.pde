@@ -62,3 +62,14 @@ void draw() {
   shader(shader);
   rect(0, 0, width, height);
 }
+
+void keyPressed(){
+  if (key == CODED) {
+    if (keyCode == UP) {
+      volume_threshold = min(1.0, volume_threshold + 0.01);
+    } else if (keyCode == DOWN) {
+      volume_threshold = max(0.0, volume_threshold - 0.01);;
+    } 
+  }
+  print("seuil = " + volume_threshold + " ; ");
+}
