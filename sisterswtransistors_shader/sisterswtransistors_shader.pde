@@ -26,7 +26,7 @@ boolean ARDUINO_ON = false;  // true si le l'interface bouton (par arduino) est 
 import controlP5.*;
 ControlP5 cp5;
 float param1, param2, param3, param4, param5;
-boolean display_param = true;
+boolean display_param = false;
 
 // Pour l'entrée micro ************************
 import processing.sound.*;
@@ -224,6 +224,8 @@ void setup() {
   h += itemHeight + 2;
 
   g.setBackgroundHeight(h);
+  
+  cp5.hide();
 }
 
 

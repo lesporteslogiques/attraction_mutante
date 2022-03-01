@@ -68,14 +68,14 @@ void main() {
         color = maskColor.rgb;
     } else {
         position = vec2(1.) - position;
-        float dx = 0.;
-        float dy = -vely;
+        float dx = -vely;
+        float dy = 0;
         if (diffuse > 0.) {
-            dx = (random(position) - 0.5) * diffuse;
+            dy = (random(position) - 0.5) * diffuse;
         }
         if (field > 0.) {
-            dx += (noise(position*fieldres + mouse) - 0.5) * field;
-            dy += (noise(position) - 0.5) * field;
+            dy += (noise(position*fieldres + mouse) - 0.5) * field;
+            dx += (noise(position) - 0.5) * field;
         }
         color = texture2D(scene, position + pixel * vec2(dx, dy)).rgb;
     }
