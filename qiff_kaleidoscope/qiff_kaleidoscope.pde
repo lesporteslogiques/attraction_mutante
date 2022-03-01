@@ -22,7 +22,7 @@
 // Config *************************************
 boolean UPLOAD_ON = true; // false pour annuler l'envoi des images sur le web
 boolean ARDUINO_ON = true;  // true si l'interface bouton (par arduino) est relié
-boolean DIAGNOSTIC_MODE = false; // automatiquement à true si problème 
+boolean DIAGNOSTIC_MODE = false; // automatiquement à true si problème
 
 // Auto-diagnostic
 boolean arduino_detected = false;
@@ -45,6 +45,9 @@ float[] volumes = new float[taille_buffeur_lissage];
 int volumes_idx = 0;
 float niveau_sonore;
 
+float volume_threshold = 0.2;
+float extra_time = 0.0;
+
 // Sons ***************************************
 SoundFile son_camera;
 
@@ -57,6 +60,9 @@ boolean bascule_bouton = true;
 import processing.video.*;
 Capture cam;
 PGraphics cam_inverse;
+
+// Shader *************************************
+PShader shader;
 
 // Pour l'upload ******************************
 import java.io.*;
@@ -82,10 +88,17 @@ String imagefilename;
 // Divers **************************************
 color remplissage = color(125, 255, 125);
 
+static int[] screen_size = {1024, 768};
+
+void settings() {
+  size(screen_size[0], screen_size[1], P2D);
+}
 
 public void setup() {
+  //size(screen_size[0], screen_size[1], P2D);
   //size(1280, 600);
-  fullScreen();
+  //fullScreen();
+  
   background(remplissage);
 
   Sound.list();                  // Liste du hardware audio
@@ -135,6 +148,10 @@ public void setup() {
   cp5.addSlider("slider5").setPosition(20, 250).setWidth(400).setValue(0.5).setRange(0, 1);
   cp5.hide();
   if (!arduino_detected || !webcam_detected || !api_key_detected) DIAGNOSTIC_MODE = true;
+
+  shader = loadShader("kaleido.frag");
+  shader.set("u_resolution", float(width), float(height));
+  noStroke();
 }
 
 public void draw() {
@@ -167,37 +184,33 @@ public void draw() {
       niveau_sonore /= volumes.length;
     } else niveau_sonore = volume.analyze(); // volume.analyze() renvoie une valeur entre 0 et 1
 
-    // Visualisation du niveau d'amplitude sonore **************************
-    fill(remplissage);
-    noStroke();
-    rect(0, 0, width/2, height/2);
-
-    if (frameCount%width == 0) {
-      rect(0, height/2, width, height/2);
-    }
-
-    fill(255, 0, 150);
-    stroke(255, 0, 150);
-    text("niveau sonore : " + niveau_sonore, 20, 20);
-    float diametre = map(niveau_sonore, 0, 1, 1, 500);
-    ellipse(530, height * 0.25, diametre, diametre);
-    ellipse(frameCount%width, height - niveau_sonore * 300, 2, 2);
+    niveau_sonore = max(niveau_sonore, volume_threshold) - volume_threshold;
+    float timer = millis() / 1000.0;
+    extra_time += niveau_sonore * 10.0;
+    timer += extra_time;
 
     // Affichage webcam ****************************************************
     if (cam.available() == true) {
 
       cam.read(); // Charger en mémoire la nouvelle image de la webcam
+      /*
       cam_inverse.beginDraw();
-      // Inverser l'image de la webcam
-      cam_inverse.pushMatrix();
-      //translate(cam.width, 0);
-      cam_inverse.translate(cam_inverse.width, 0);
-      cam_inverse.scale(-1, 1);
-      cam_inverse.image(cam, 0, 0);
-      cam_inverse.popMatrix();
-      cam_inverse.endDraw();
-      image(cam_inverse, width/2, 0); // Afficher le buffer d'image inversée
+       // Inverser l'image de la webcam
+       cam_inverse.pushMatrix();
+       //translate(cam.width, 0);
+       cam_inverse.translate(cam_inverse.width, 0);
+       cam_inverse.scale(-1, 1);
+       cam_inverse.image(cam, 0, 0);
+       cam_inverse.popMatrix();
+       cam_inverse.endDraw();
+       image(cam_inverse, width/2, 0); // Afficher le buffer d'image inversée
+       */
     }
+
+    shader.set("u_time", timer);
+    shader.set("u_tex0", cam);
+    shader(shader);
+    rect(0, 0, width, height);
 
     // Un délai est nécessaire pour éviter d'avoir l'icone d'upload dans l'image envoyé
     if (upload_pending && (millis() - upload_started > 100) ) {
