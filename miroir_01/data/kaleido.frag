@@ -1,4 +1,3 @@
-//adaptation of novogrammer shader -> https://www.shadertoy.com/view/ltGGRW
 #version 120
 
 #ifdef GL_ES
@@ -18,40 +17,59 @@ vec2 rotateCoord(vec2 coord, float rotation){
     return coord * rotate2d(rotation);
 }
 //
-vec2 hexGrid(vec2 coord,float size){
+vec2 hexGrid(vec2 coord, float size){
     vec2 rect = vec2(size * 3.0, sqrt(3) * size); // from https://www.redblobgames.com/grids/hexagons/
-    vec2 rep = mod(coord, rect); // we subdivide the space into a grid of rect
+    vec2 rep = mod(coord, rect); // we subdivide the space into a grid of rect representing the hexagrid points (4 corners + center)
     //then we check which is the nearest to the different grid points
-    vec2 p[5];
-    p[0] = rep;
-    p[1] = vec2(rep.x - rect.x, rep.y);
-    p[2] = vec2(rep.x, rep.y - rect.y);
-    p[3] = rep - rect;
-    p[4] = rep - rect * 0.5;
+    vec2 center = u_resolution.xy * 0.5;
+    vec2 p[3];
+    p[0] = vec2(0.0, rect.y);
+    p[1] = vec2(rect.x, 0.0);
+    p[2] = rect * 0.5;
+    float d[5];
+    d[0] = length(rep);
+    d[1] = distance(rep, p[0]);
+    d[2] = distance(rep, rect);
+    d[3] = distance(rep, p[1]);
+    d[4] = distance(rep, p[2]);
     int shortestIndex = 0;
-    float shortestLength = length(p[0]);
-    for(int i=1 ; i<5 ; ++i)
-    {
-        float l = length(p[i]);
-            if(l < shortestLength)
-            {
-                shortestLength = l;
+    float shortestLength = d[0];
+    for(int i=1 ; i<5; ++i){
+        float len = d[i];
+            if(len < shortestLength){
+                shortestLength = len;
                 shortestIndex = i;
             }
     }
-   return p[shortestIndex];
+    //picking the corresponding color
+    switch (shortestIndex){
+    case 0:
+        rep = center + (rep - p[2]) + p[2];
+        break;
+    case 1:
+        rep = center + (rep - p[2]) + vec2(rect.x*0.5, -rect.y*0.5);
+        break;
+    case 2:
+        rep = center + (rep - p[2]) - p[2];
+        break;
+    case 3:
+        rep = center + (rep - p[2]) + vec2(-rect.x*0.5, rect.y*0.5);
+        break;
+    case 4:
+        rep = center + (rep - p[2]);
+        break;
+    }
+    return rep - center; // "- center" for later rotation
 }
 //
-vec2 calcCoord(vec2 coord){
+vec2 calcCoord(vec2 coord){ //from novogrammer shader -> https://www.shadertoy.com/view/ltGGRW
     float dist = length(coord); //distance btw coord and center
     float angle = atan(coord.y,coord.x); //angle btw coord and center
     const float rad60 = radians(60.0); //convert 60° to rad, which is the angle of the 6 iso. triangles inside a hexagone
-    //
     angle = mod(angle, rad60 * 2.0); //draw the first 3 faces in 120° angle -> for now, all the possible angles are btw 0° and 120°
     if(angle > rad60){
         angle = rad60 * 2.0 - angle; //draw the last 3 faces at the opposite with angle btw 120° and 60°
     }
-    //
     return vec2(cos(angle),sin(angle)) * dist; //return new coord with polar coordinate
 }
 //color adjust from https://alaingalvan.tumblr.com/post/79864187609/glsl-color-correction-shaders
@@ -72,20 +90,15 @@ vec3 adjustSaturation(vec3 color, float value) {
 void main(){
   vec2 uv = gl_FragCoord.xy;
   //kaleidoscope
-  float size = 200.0 + sin(u_time * 0.01) * 100.0; //dist btw hexagone center and one of the 6 hexagone points
+  float size = 150.0 + sin(u_time * 0.01) * 100.0; //dist btw the hexagone center and one of its 6 points
   float rotation = u_time * 0.01;
   vec2 center = u_resolution * 0.5;
-  //comment/uncomment to see the different steps;
   vec2 texCoord = uv;
-  //texCoord = uv - center; //for later rotation along a centered z axis
-  //texCoord = rotateCoord(uv - center, rotation); // to rotate around Z axis -> not needed, only for extra effect
-  //texCoord = hexGrid(uv, size) + center; //with "+ center" the coord(0,0) is the webcam center
-  //texCoord = calcCoord(uv - center); //one hexagonal kaléidoscope centered
-  //texCoord = calcCoord(hexGrid((uv), size))+ center; //kaléidoscope simple
-  texCoord = rotateCoord(calcCoord(hexGrid(rotateCoord((uv - center), rotation) + center, size)), -rotation) + center; //kaleidoscope with interaction
+  uv.x = u_resolution.x - uv.x;
+  texCoord = rotateCoord(calcCoord(hexGrid(rotateCoord((uv), rotation*0.3), size)), -rotation) + center; //kaleidoscope with interaction (rotateCoord not needed for no interaction)
   vec4 outc = texture2D(u_tex0, texCoord/u_resolution);
   //color adjust
-  outc.rgb = brightnessContrast(outc.rgb, -0.1, 1.1);
-  outc.rgb = adjustSaturation(outc.rgb, 0.25);
+  // outc.rgb = brightnessContrast(outc.rgb, 0.0, 1.1);
+  // outc.rgb = adjustSaturation(outc.rgb, 0.25);
   gl_FragColor = outc;
 }
