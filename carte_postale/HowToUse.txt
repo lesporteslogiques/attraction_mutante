@@ -1,0 +1,6 @@
+Principal :
+- ajouter une image dans le noeud "Image Texture" présent dans le matériel de l'objet "Visage".
+
+Optionnel :
+- dans l'objet "Miroir" -> changer la texture du Modifier "Displace" pour différents effets de déformation.
+- changer les paramètres de rendu au besoin.
