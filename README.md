@@ -18,3 +18,7 @@ Effet inspiré du documentaire "Sisters with Transistors".
 
 ### Datamoshing5
 Effet datamoshing
+
+## Améliorations à apporter (TODO)
+ * Enregistrement des photos dans un dossier commun (et facilement récupérable)
+ * Message de debug en cas de problème de périphérique (bouton série ou webcam)
