@@ -22,5 +22,5 @@ Effet datamoshing
 ## Améliorations à apporter (TODO)
  * Enregistrement des photos dans un dossier commun (et facilement récupérable)
  * Ajouter le dossier des photos au gitignore
- * Message de debug en cas de problème de périphérique (bouton série ou webcam)
+ * Message de debug en cas de problème de périphérique (bouton série, webcam, son)
  * Simplification du paramétrage de l'orientation de la webcam/écran
