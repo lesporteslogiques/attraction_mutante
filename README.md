@@ -24,3 +24,4 @@ Effet datamoshing
  * Ajouter le dossier des photos au gitignore
  * Message de debug en cas de problème de périphérique (bouton série, webcam, son)
  * Simplification du paramétrage de l'orientation de la webcam/écran
+ * Temps de "freeze" minimal lorsqu'on appuie sur le déclencheur (actuellement manque de feedback sur "time displacement")
